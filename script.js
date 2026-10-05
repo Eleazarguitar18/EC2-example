@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function () {
     initFilter();
     initSidebar();
     initBarChart();
+    initKeyboardNav();
+    initReducedMotion();
 });
 
 /**
@@ -67,17 +69,31 @@ function initFilter() {
 }
 
 /**
- * Navegación lateral (simulada)
+ * Navegación lateral (simulada) con soporte de teclado
  */
 function initSidebar() {
     const menuItems = document.querySelectorAll('.sidebar-menu li');
 
     menuItems.forEach(function (item) {
+        // Click
         item.addEventListener('click', function () {
-            menuItems.forEach(function (i) { i.classList.remove('active'); });
-            this.classList.add('active');
+            setActiveMenuItem(this);
+        });
+
+        // Keyboard support (Enter/Space)
+        item.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setActiveMenuItem(this);
+            }
         });
     });
+}
+
+function setActiveMenuItem(selectedItem) {
+    const menuItems = document.querySelectorAll('.sidebar-menu li');
+    menuItems.forEach(function (i) { i.classList.remove('active'); });
+    selectedItem.classList.add('active');
 }
 
 /**
@@ -92,6 +108,63 @@ function initBarChart() {
             this.setAttribute('title', 'Uso de CPU: ' + height);
         });
     });
+}
+
+/**
+ * Navegación por teclado global
+ */
+function initKeyboardNav() {
+    document.addEventListener('keydown', function (e) {
+        // Ctrl/Cmd + K para enfocar búsqueda
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.focus();
+        }
+
+        // Escape para limpiar búsqueda
+        if (e.key === 'Escape') {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && document.activeElement === searchInput) {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input'));
+                searchInput.blur();
+            }
+        }
+    });
+}
+
+/**
+ * Soporte para prefers-reduced-motion
+ */
+function initReducedMotion() {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function handleMotionPreference(e) {
+        if (e.matches) {
+            // Desactivar animaciones
+            document.querySelectorAll('.metric-card').forEach(function (card) {
+                card.style.animation = 'none';
+                card.style.opacity = '1';
+            });
+        } else {
+            // Restaurar animaciones
+            document.querySelectorAll('.metric-card').forEach(function (card) {
+                card.style.animation = '';
+                card.style.opacity = '';
+            });
+        }
+    }
+
+    // Verificar soporte para addListener (Safari antiguo)
+    if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleMotionPreference);
+    } else if (mediaQuery.addListener) {
+        mediaQuery.addListener(handleMotionPreference);
+    }
+
+    // Aplicar estado inicial
+    handleMotionPreference(mediaQuery);
 }
 
 /**
