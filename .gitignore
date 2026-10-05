@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+vendor/
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# Build
+dist/
+build/
+*.tmp
+
+# Skill data (large generated files)
+skill/data/*.json
+skill/data/*.csv
